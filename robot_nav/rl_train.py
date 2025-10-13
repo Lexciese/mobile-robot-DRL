@@ -1,4 +1,5 @@
 from robot_nav.models.CNNTD3.CNNTD3 import CNNTD3
+from robot_nav.models.TD3.TD3 import TD3
 
 import torch
 import numpy as np
@@ -10,7 +11,7 @@ def main(args=None):
     """Main training function"""
     action_dim = 2  # number of actions produced by the model
     max_action = 1  # maximum absolute value of output actions
-    state_dim = 95  # number of input values in the neural network (vector length of state input)
+    state_dim = 12  # number of input values in the neural network (vector length of state input)
     device = torch.device(
         "cuda" if torch.cuda.is_available() else "cpu"
     )  # using cuda if it is available, cpu otherwise
@@ -21,28 +22,30 @@ def main(args=None):
     episode = 0  # starting episode number
     train_every_n = 2  # train and update network parameters every n episodes
     training_iterations = 80  # how many batches to use for single training cycle
-    batch_size = 64  # batch size for each training iteration
-    max_steps = 300  # maximum number of steps in single episode
+    batch_size = 256  # batch size for each training iteration
+    max_steps = 400  # maximum number of steps in single episode
     steps = 0  # starting step number
     load_saved_buffer = False  # whether to load experiences from assets/data.yml
     pretrain = False  # whether to use the loaded experiences to pre-train the model (load_saved_buffer must be True)
     pretraining_iterations = (
-        10  # number of training iterations to run during pre-training
+        50  # number of training iterations to run during pre-training
     )
     save_every = 5  # save the model every n training cycles
 
-    model = CNNTD3(
+    model = TD3(
         state_dim=state_dim,
         action_dim=action_dim,
         max_action=max_action,
         device=device,
-        save_every=save_every,
         load_model=False,
-        model_name="CNNTD3",
-    )  # instantiate a model
+        model_name="TD3",
+        save_every=save_every,
+        use_max_bound=True,
+        bound_weight=0.3
+    )
 
     sim = SIM(
-        world_file="worlds/robot_world.yaml", disable_plotting=False
+        world_file="worlds/robot_world.yaml", disable_plotting=True 
     )  # instantiate environment
     replay_buffer = get_buffer(
         model,
@@ -82,7 +85,7 @@ def main(args=None):
         if (
             terminal or steps == max_steps
         ):  # reset environment of terminal stat ereached, or max_steps were taken
-            latest_scan, distance, cos, sin, collision, goal, a, reward = sim.reset()
+            latest_scan, distance, cos, sin, collision, goal, a, reward = sim.reset(random_obstacles=False)
             episode += 1
             if episode % train_every_n == 0:
                 model.train(
@@ -111,7 +114,7 @@ def evaluate(model, epoch, sim, eval_episodes=10):
     goals = 0
     for _ in range(eval_episodes):
         count = 0
-        latest_scan, distance, cos, sin, collision, goal, a, reward = sim.reset()
+        latest_scan, distance, cos, sin, collision, goal, a, reward = sim.reset(random_obstacles=False)
         done = False
         while not done and count < 501:
             state, terminal = model.prepare_state(

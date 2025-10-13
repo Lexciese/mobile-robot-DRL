@@ -1,0 +1,34 @@
+world:
+  height: 10  # the height of the world
+  width: 10   # the height of the world
+  step_time: 0.3  # 10Hz calculate each step
+  sample_time: 0.3  # 10 Hz for render and data extraction
+  collision_mode: 'reactive'
+  obstacle_map: '/home/lexciese22/DRL-robot-navigation-IR-SIM/robot_nav/worlds/maze_3.png'
+  mdownsample: 1
+
+
+robot:
+  - kinematics: {name: 'diff'}
+    shape: {name: 'circle', radius: 0.2}
+    vel_min: [ 0, -0.1 ]
+    vel_max: [ 0.1, 0.1 ]
+    state: [1, 2, 0, 0]
+    goal: [9, 9, 0]
+    arrive_mode: position
+    goal_threshold: 0.3
+
+    sensors:
+      - type: 'lidar2d'
+        range_min: 0
+        range_max: 7
+        angle_range: 3.14
+        number: 7
+        noise: True
+        std: 0.08
+        angle_std: 0.1
+        offset: [ 0, 0, 0 ]
+        alpha: 0.3
+
+    plot:
+      show_trajectory: True

@@ -132,7 +132,7 @@ class TD3(object):
         action_dim,
         max_action,
         device,
-        lr=1e-4,
+        lr=5e-5,
         save_every=0,
         load_model=False,
         save_directory=Path("robot_nav/models/TD3/checkpoint"),

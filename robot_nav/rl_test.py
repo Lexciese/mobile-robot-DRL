@@ -10,7 +10,7 @@ def main(args=None):
     """Main testing function"""
     action_dim = 2  # number of actions produced by the model
     max_action = 1  # maximum absolute value of output actions
-    state_dim = 25  # number of input values in the neural network (vector length of state input)
+    state_dim = 12  # number of input values in the neural network (vector length of state input)
     device = torch.device(
         "cuda" if torch.cuda.is_available() else "cpu"
     )  # using cuda if it is available, cpu otherwise
@@ -26,7 +26,7 @@ def main(args=None):
         model_name="TD3",
     )  # instantiate a model
 
-    sim = SIM(world_file="worlds/eval_world.yaml")  # instantiate environment
+    sim = SIM(world_file="worlds/robot_world.yaml")  # instantiate environment
     with open("robot_nav/eval_points.yaml") as file:
         points = yaml.safe_load(file)
     robot_poses = points["robot"]["poses"]
