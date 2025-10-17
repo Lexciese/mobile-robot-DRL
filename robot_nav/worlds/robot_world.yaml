@@ -13,12 +13,12 @@ robot:
     state: [2, 2, 0, 0]
     goal: [9, 9, 0]
     arrive_mode: position
-    goal_threshold: 0.3
+    goal_threshold: 0.1
 
     sensors:
       - type: 'lidar2d'
         range_min: 0
-        range_max: 7
+        range_max: 2
         angle_range: 3.14
         number: 7
         noise: True

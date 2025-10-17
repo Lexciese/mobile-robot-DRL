@@ -82,104 +82,12 @@ class SIM(SIM_ENV):
         action = [lin_velocity, ang_velocity]
         reward = self.get_reward(goal, collision, action, latest_scan)
 
-        # Publish laser scan to ROS2
+        # Create fixed angles for 7 rays spanning 180 degrees
+        angles = np.linspace(-np.pi / 2, np.pi / 2, 7)
+
+        # Publish laser scan to ROS2 with fixed parameters
         self._publish_laser_scan(
-            latest_scan, scan["angles"], scan["min_range"], scan["max_range"]
-        )
-
-        # Publish odometry to ROS2
-        self._publish_odometry(robot_state, lin_velocity, ang_velocity)
-
-        # Process any pending ROS callbacks
-        rclpy.spin_once(self.node, timeout_sec=0)
-
-        return latest_scan, distance, cos, sin, collision, goal, action, reward
-
-    def _publish_laser_scan(self, ranges, angles, range_min, range_max):
-        """
-        Publish laser scan data to ROS2 topic
-        """
-        msg = LaserScan()
-        now = self.node.get_clock().now().to_msg()
-        msg.header = Header(stamp=now, frame_id="laser")
-        msg.angle_min = float(angles[0])
-        msg.angle_max = float(angles[-1])
-        msg.angle_increment = (
-            float(angles[1] - angles[0]) if len(angles) > 1 else 0.0
-        )
-        msg.time_increment = 0.0
-        msg.scan_time = 0.1
-        msg.range_min = float(range_min)
-        msg.range_max = float(range_max)
-        msg.ranges = [float(r) for r in ranges]
-
-        self.laser_pub.publish(msg)
-
-    def _publish_odometry(self, robot_state, lin_vel, ang_vel):
-        """
-        Publish odometry data to ROS2 topic
-        """
-        msg = Odometry()
-        now = self.node.get_clock().now().to_msg()
-        msg.header = Header(stamp=now, frame_id="odom")
-        msg.child_frame_id = "base_link"
-
-        # Set position
-        msg.pose.pose.position = Point(
-            x=float(robot_state[0]), y=float(robot_state[1]), z=0.0
-        )
-
-        # Set orientation (convert Euler angle to quaternion)
-        q = quaternion_from_euler(0, 0, float(robot_state[2]))
-        msg.pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
-
-        # Set linear and angular velocities
-        msg.twist.twist.linear = Vector3(x=float(lin_vel), y=0.0, z=0.0)
-        msg.twist.twist.angular = Vector3(x=0.0, y=0.0, z=float(ang_vel))
-
-        self.odom_pub.publish(msg)
-
-    def close(self):
-        """
-        Cleanup resources including ROS2 node
-        """
-        self.node.destroy_node()
-        rclpy.shutdown()
-
-    def step(self, lin_velocity=0.0, ang_velocity=0.1):
-        """
-        Perform one step in the simulation using the given control commands.
-
-        Args:
-            lin_velocity (float): Linear velocity to apply to the robot.
-            ang_velocity (float): Angular velocity to apply to the robot.
-
-        Returns:
-            (tuple): Contains the latest LIDAR scan, distance to goal, cosine and sine of angle to goal,
-                   collision flag, goal reached flag, applied action, and computed reward.
-        """
-        self.env.step(action_id=0, action=np.array([[lin_velocity], [ang_velocity]]))
-        self.env.render()
-
-        scan = self.env.get_lidar_scan()
-        latest_scan = scan["ranges"]
-
-        robot_state = self.env.get_robot_state()
-        goal_vector = [
-            self.robot_goal[0].item() - robot_state[0].item(),
-            self.robot_goal[1].item() - robot_state[1].item(),
-        ]
-        distance = np.linalg.norm(goal_vector)
-        goal = self.env.robot.arrive
-        pose_vector = [np.cos(robot_state[2]).item(), np.sin(robot_state[2]).item()]
-        cos, sin = self.cossin(pose_vector, goal_vector)
-        collision = self.env.robot.collision
-        action = [lin_velocity, ang_velocity]
-        reward = self.get_reward(goal, collision, action, latest_scan)
-
-        # Publish laser scan to ROS2
-        self._publish_laser_scan(
-            latest_scan, scan["angles"], scan["min_range"], scan["max_range"]
+            latest_scan, angles, 0.0, 8.0
         )
 
         # Publish odometry to ROS2

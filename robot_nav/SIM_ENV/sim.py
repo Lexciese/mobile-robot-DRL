@@ -141,3 +141,12 @@ class SIM(SIM_ENV):
         else:
             r3 = lambda x: 1.35 - x if x < 1.35 else 0.0
             return action[0] - abs(action[1]) / 2 - r3(min(laser_scan)) / 2
+
+    def set_robot_goal(self, robot_goal):
+        """Set a new goal for the robot in the environment.
+
+        Args:
+            robot_goal (list or np.ndarray): The new goal position for the robot.
+        """
+        self.env.robot.set_goal(np.array(robot_goal), init=False)
+        self.robot_goal = self.env.robot.goal
