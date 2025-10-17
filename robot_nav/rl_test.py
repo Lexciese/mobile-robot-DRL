@@ -56,6 +56,7 @@ def main(args=None):
             )
             action = model.get_action(np.array(state), False)
             a_in = [(action[0] + 1) / 4, action[1]]
+            print(f"cmd_x: {a_in[0]}, cmd_w: {a_in[1]}")
             latest_scan, distance, cos, sin, collision, goal, a, reward = sim.step(
                 lin_velocity=a_in[0], ang_velocity=a_in[1]
             )

@@ -1,19 +1,19 @@
 world:
-  height: 10  # the height of the world
-  width: 10   # the height of the world
+  height: 5  # the height of the world
+  width: 5   # the height of the world
   step_time: 0.3  # 10Hz calculate each step
   sample_time: 0.3  # 10 Hz for render and data extraction
   collision_mode: 'reactive'
 
 robot:
   - kinematics: {name: 'diff'}
-    shape: {name: 'circle', radius: 0.2}
-    vel_min: [ 0, -0.3 ]
-    vel_max: [ 1.0, 0.3 ]
+    shape: {name: 'rectangle', length: 0.2, width: 0.26, wheelbase: 0.15}
+    vel_min: [ 0.0, -2.0 ]
+    vel_max: [ 1.0, 2.0 ]
     state: [2, 2, 0, 0]
-    goal: [9, 9, 0]
+    goal: [3, 3, 0]
     arrive_mode: position
-    goal_threshold: 0.1
+    goal_threshold: 0.2
 
     sensors:
       - type: 'lidar2d'
